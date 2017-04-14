@@ -1,5 +1,4 @@
-﻿
-package Modul7;
+package Tugas7;
 
 /**
  *
@@ -99,6 +98,24 @@ public class FormDataBuku extends javax.swing.JFrame {
         }
     }
    
+    private void PencarianData(String by, String cari){
+        try{
+            String sql = "SELECT * FROM buku where "+by+" LIKE '%"+cari+"%';";
+            stt = con.createStatement();
+            rss = stt.executeQuery(sql);
+            while(rss.next()){
+                Object[] data = new Object[4];
+                data[0] = rss.getString("id");
+                data[1] = rss.getString("judul");
+                data[2] = rss.getString("penulis");
+                data[3] = rss.getInt("harga");
+                model.addRow(data);
+            }
+        }catch(Exception e){
+        System.out.println(e.getMessage());
+    }
+    }
+    
     private void kuy(String judul, String penulis, String harga){
         try{
             String sql = "SELECT * FROM buku";
@@ -110,7 +127,7 @@ public class FormDataBuku extends javax.swing.JFrame {
                 o[1] = rss.getString("penulis").toLowerCase();
                 
                 if(o[0].equals(judul.toLowerCase()) && o[1].equals(penulis.toLowerCase())){
-                    JOptionPane.showMessageDialog(null,"Datanya udah ada bang");
+                    JOptionPane.showMessageDialog(null,"Your Data Ready");
                     kuyuy=false;
                     break;
                 }
@@ -168,6 +185,11 @@ public class FormDataBuku extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jTable1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                formMouseClicked(evt);
+            }
+        });
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 formComponentShown(evt);
@@ -337,6 +359,12 @@ public class FormDataBuku extends javax.swing.JFrame {
             }
         });
 
+        txtcari.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                txtcariCaretUpdate(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -395,7 +423,7 @@ public class FormDataBuku extends javax.swing.JFrame {
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(77, Short.MAX_VALUE))
         );
 
         pack();
@@ -405,16 +433,17 @@ public class FormDataBuku extends javax.swing.JFrame {
         //untuk action tombol ubah
         int baris = tabel.getSelectedRow();
         
-        tabel.setValueAt(txtjudul.getText(), baris, 1);
-        tabel.setValueAt(cbpenulis.getSelectedItem(), baris, 2);
-        tabel.setValueAt(txtharga.getText(), baris, 3);
-        
         String judul = tabel.getValueAt(baris, 1).toString();
         String penulis = tabel.getValueAt(baris, 2).toString();
         String harga = tabel.getValueAt(baris, 3).toString();
         String id = tabel.getValueAt(baris, 0).toString();
         
-        UbahData(judul,penulis,harga,id);
+        if(HapusData(id))
+            JOptionPane.showMessageDialog(null, "Berhasil Hapus Data");
+        else
+            JOptionPane.showConfirmDialog(null, "Gagal Hapus Data");
+        
+        InitTable();TampilData();
     }//GEN-LAST:event_btnubahActionPerformed
 
     
@@ -472,6 +501,25 @@ public class FormDataBuku extends javax.swing.JFrame {
         model.fireTableDataChanged();//untuk mengubah dan menghapus data yang ada pada tabel
         CariData();
     }//GEN-LAST:event_btncariActionPerformed
+
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
+        // TODO add your handling code here:
+        int baris = tabel.getSelectedRow();
+        
+        txtjudul.setText(tabel.getValueAt(baris, 1)).toString());
+        cbpenulis.setSelectedItem(tabel.getValueAt(baris, 2).toString());
+        txtharga.setText(tabel.getValueAt(baris, 3).toString());
+    }//GEN-LAST:event_formMouseClicked
+
+    private void txtcariCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_txtcariCaretUpdate
+        // TODO add your handling code here:
+        InitTable();
+        if(txtcari.getText().length()==0){
+                TampilData();
+        }else{
+            PencarianData(comboSearchBy.getSelectedItem().toString(),txtcari.getText());
+        }
+    }//GEN-LAST:event_txtcariCaretUpdate
 
     /**
      * @param args the command line arguments
